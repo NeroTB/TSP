@@ -36,7 +36,7 @@
         background: none;
         cursor: pointer;
       }
-      /* 아이콘 버튼 (현재 내 위치로 돌아가기) 스타일 */
+      /* "현재 내 위치로 이동" 버튼: GPS 아이콘 추가 */
       #centerLocation {
         width: 30px;
         height: 30px;
@@ -45,8 +45,30 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+      /* GPS 아이콘 스타일 */
+      #centerLocation svg {
+        width: 18px;
+        height: 18px;
+        fill: white;
+      }
+      /* 고급 버튼 토글 아이콘 스타일 */
+      #advancedToggle {
+        width: 30px;
+        height: 30px;
+        background: #28a745;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         color: white;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      }
+      #advancedToggle svg {
+        width: 18px;
+        height: 18px;
+        fill: white;
       }
       #visitCounter {
         font-size: 14px;
@@ -58,7 +80,7 @@
         top: 0;
         left: 50%;
         transform: translateX(-50%);
-        background: rgba(0,0,0,0.8);
+        background: rgba(0, 0, 0, 0.8);
         color: white;
         padding: 10px 20px;
         border-radius: 4px;
@@ -100,14 +122,21 @@
     <div id="infoDialog"></div>
     <!-- 지도 표시 영역 -->
     <div id="map"></div>
-    <!-- 전체 방문 제어 및 방문 카운터, 그리고 현재 내 위치로 돌아가기 버튼 추가 -->
+    <!-- 전체 방문 제어 및 방문 카운터, 현재 내 위치 이동 버튼, 그리고 고급 버튼을 활성화하는 토글 버튼 추가 -->
     <div id="controls">
-      <button id="checkAll">전체 방문 확인</button>
-      <button id="uncheckAll">전체 방문 해제</button>
+      <!-- 고급 버튼 토글: 기본적으로 전체 방문 버튼은 숨김 -->
+      <button id="advancedToggle" title="고급 버튼 활성화">
+        <!-- SVG (예: 톱니바퀴 아이콘) -->
+        <svg viewBox="0 0 24 24">
+          <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zm7.43-3a5.517 5.517 0 0 0-.14-1l2.02-1.57a.5.5 0 0 0 .12-.66l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.38.96a5.507 5.507 0 0 0-1.73-1l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54a5.507 5.507 0 0 0-1.73 1l-2.38-.96a.5.5 0 0 0-.61.22L2.4 8.83a.5.5 0 0 0 .12.66l2.02 1.57a5.517 5.517 0 0 0-.14 1 5.5 5.5 0 0 0 0 2l-2.02 1.57a.5.5 0 0 0-.12.66l1.92 3.32a.5.5 0 0 0 .61.22l2.38-.96c.52.41 1.09.76 1.73 1l.36 2.54a.5.5 0 0 0 .5.42h3.84a.5.5 0 0 0 .5-.42l.36-2.54c.64-.24 1.21-.59 1.73-1l2.38.96a.5.5 0 0 0 .61-.22l1.92-3.32a.5.5 0 0 0-.12-.66l-2.02-1.57c.09-.33.14-.67.14-1s-.05-.67-.14-1z"/>
+        </svg>
+      </button>
+      <button id="checkAll" style="display: none;">전체 방문 확인</button>
+      <button id="uncheckAll" style="display: none;">전체 방문 해제</button>
       <button id="centerLocation" title="현재 내 위치로 이동">
-        <!-- 간단한 SVG 아이콘 -->
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M8 0C3.58 0 0 3.58 0 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm3.93 4.67l-1.41 1.41L10.83 7H8v2h2.83l.69.69 1.41-1.41L9.41 7l2.52-2.33zM8 14C4.13 14 2 11.87 2 8c0-1.74.8-3.27 2.07-4.33l1.41 1.41C4.34 6.08 4 7 4 8c0 2.21 1.79 4 4 4 1 0 1.92-.34 2.25-.68l1.41 1.41C11.27 13.2 9.74 14 8 14z" fill="white"/>
+        <!-- GPS 아이콘 SVG -->
+        <svg viewBox="0 0 24 24">
+          <path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm3.93 4.67l-1.41 1.41L10.83 7H13a1 1 0 1 1 0 2H8.17l-.69.69-1.41-1.41L10.59 7 8.07 4.67l1.41-1.41L12 5.17l2.52-2.91 1.41 1.41zM12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>
         </svg>
       </button>
       <span id="visitCounter">0 / 0</span>
@@ -268,6 +297,19 @@
         }
       }
 
+      // 고급 버튼 토글 처리: "전체 방문 확인"/"전체 방문 해제" 버튼을 토글합니다.
+      function toggleAdvancedButtons() {
+        const checkBtn = document.getElementById("checkAll");
+        const uncheckBtn = document.getElementById("uncheckAll");
+        if (checkBtn.style.display === "none") {
+          checkBtn.style.display = "block";
+          uncheckBtn.style.display = "block";
+        } else {
+          checkBtn.style.display = "none";
+          uncheckBtn.style.display = "none";
+        }
+      }
+
       // 맵 초기화 및 마커 추가 (parsed.json 파일 데이터 사용)
       function initMap() {
         fetch("parsed.json")
@@ -329,7 +371,6 @@
                     g.infoWindow = null;
                   }
                 });
-
                 if (group.infoWindow) {
                   group.infoWindow.close();
                   group.infoWindow = null;
@@ -344,7 +385,6 @@
                   setTimeout(() => {
                     delete group.infoWindow.justOpened;
                   }, 100);
-
                   // 팝업 표시 후, 마커가 화면 상단에 있으면 지도 아래로 pan 처리
                   setTimeout(() => {
                     if (map.getProjection) {
@@ -357,7 +397,6 @@
                       map.panBy(0, 150);
                     }
                   }, 200);
-
                   naver.maps.Event.addListener(group.infoWindow, "closeclick", function () {
                     group.infoWindow = null;
                   });
@@ -375,7 +414,6 @@
                 }
               });
             });
-
             const totalItems = markerGroups.reduce((count, group) => count + group.data.length, 0);
             showInfoDialog(`전체 ${totalItems}개의 장소가 로드되었습니다.`);
             saveVisitedState();
@@ -384,7 +422,7 @@
             console.error("data load error:", err);
           });
 
-        // 모바일 기기의 현재 위치를 실시간으로 지도에 표시 (내 위치 표시용 마커 디자인 변경)
+        // 모바일 기기의 현재 위치를 실시간으로 지도에 표시 (내 위치 표시용 마커)
         if (navigator.geolocation) {
           navigator.geolocation.watchPosition(
             function (position) {
@@ -417,13 +455,13 @@
             },
             {
               enableHighAccuracy: true,
-              maximumAge: 0,
+              maximumAge: 0
             }
           );
         }
       }
 
-      // 상단의 전체 방문 확인 / 해제 버튼 이벤트 처리
+      // 상단의 버튼 이벤트 처리
       document.getElementById("checkAll").addEventListener("click", () => {
         markerGroups.forEach((group) => {
           group.data.forEach((item) => (item.visited = true));
@@ -440,9 +478,10 @@
         saveVisitedState();
         updateVisitCounter();
       });
-
       // "현재 내 위치로" 버튼 이벤트 처리
       document.getElementById("centerLocation").addEventListener("click", centerOnMyLocation);
+      // 고급 버튼 토글 이벤트 처리
+      document.getElementById("advancedToggle").addEventListener("click", toggleAdvancedButtons);
 
       // 정보 다이얼로그 표시 함수
       function showInfoDialog(message) {
