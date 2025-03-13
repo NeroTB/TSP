@@ -31,6 +31,23 @@
         align-items: center;
         gap: 10px;
       }
+      #controls button {
+        border: none;
+        background: none;
+        cursor: pointer;
+      }
+      /* 아이콘 버튼 (현재 내 위치로 돌아가기) 스타일 */
+      #centerLocation {
+        width: 30px;
+        height: 30px;
+        background: #007bff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      }
       #visitCounter {
         font-size: 14px;
         font-weight: bold;
@@ -41,7 +58,7 @@
         top: 0;
         left: 50%;
         transform: translateX(-50%);
-        background: rgba(0,0,0,0.8);
+        background: rgba(0, 0, 0, 0.8);
         color: white;
         padding: 10px 20px;
         border-radius: 4px;
@@ -83,10 +100,16 @@
     <div id="infoDialog"></div>
     <!-- 지도 표시 영역 -->
     <div id="map"></div>
-    <!-- 전체 방문 제어 및 방문 카운터 -->
+    <!-- 전체 방문 제어 및 방문 카운터, 그리고 현재 내 위치로 돌아가기 버튼 추가 -->
     <div id="controls">
       <button id="checkAll">전체 방문 확인</button>
       <button id="uncheckAll">전체 방문 해제</button>
+      <button id="centerLocation" title="현재 내 위치로 이동">
+        <!-- 간단한 SVG 아이콘 (예: 방향 아이콘) -->
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8 0C3.58 0 0 3.58 0 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm3.93 4.67l-1.41 1.41L10.83 7H8v2h2.83l.69.69 1.41-1.41L9.41 7l2.52-2.33zM8 14C4.13 14 2 11.87 2 8c0-1.74.8-3.27 2.07-4.33l1.41 1.41C4.34 6.08 4 7 4 8c0 2.21 1.79 4 4 4 1 0 1.92-.34 2.25-.68l1.41 1.41C11.27 13.2 9.74 14 8 14z" fill="white"/>
+        </svg>
+      </button>
       <span id="visitCounter">0 / 0</span>
     </div>
     <script>
@@ -94,7 +117,7 @@
       let map;
       let markerGroups = []; // 좌표별 그룹: 그룹당 다수의 장소 정보를 포함
       const STORAGE_KEY = "visitedState";
-      let mobileMarker = null;  // mobile 위치 표시용 마커
+      let mobileMarker = null;  // 모바일 기기의 현재 위치 마커
 
       // 방문 상태 저장
       function saveVisitedState() {
@@ -155,48 +178,33 @@
       // 커스텀 마커 아이콘 (HTML 컨텐츠로 구성)
       function getCustomDivIcon(group) {
         const allVisited = group.data.every((item) => item.visited);
-        let color, opacity;
+        let fillColor = "";
         if (allVisited) {
-          color = "grey";
-          opacity = 0.6;
+          fillColor = "grey";
         } else {
-          opacity = 1.0;
-          color = group.data.length > 1 ? "red" : "blue";
+          fillColor = group.data.length > 1 ? "red" : "blue";
         }
-        let iconUrl = "";
-        if (color === "grey")
-          iconUrl = "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png";
-        else if (color === "red")
-          iconUrl = "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png";
-        else
-          iconUrl = "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png";
-
-        let countText = group.data.length > 1 ? group.data.length : "";
+        let extraText = group.data.length > 1 ? group.data.length : "";
         const html = `
-          <div style="position: relative; width: 25px; height: 41px;">
-            <img src="${iconUrl}" style="width: 25px; height: 41px; opacity: ${opacity};" />
+          <div style="position: relative; width: 30px; height: 30px;">
+            <div style="background: ${fillColor}; border: 2px solid white; border-radius: 50%; width: 30px; height: 30px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"></div>
             ${
-              countText
-                ? `<div style="position: absolute; top: 0; left: 0; width: 25px; height: 41px; display: flex; align-items: center; justify-content: center;">
-                      <div style="background: rgba(0,0,0,0.4); border-radius: 50%; padding: 2px 4px; margin-top: -4px;">
-                        <span style="font-weight: bold; color: white; font-size: 12px; text-shadow: 1px 1px 2px black;">
-                          ${countText}
-                        </span>
-                      </div>
-                   </div>`
+              extraText
+                ? `<div style="position: absolute; top: 0; left: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                    ${extraText}
+                  </div>`
                 : ""
             }
           </div>
         `;
         return {
           content: html,
-          size: new naver.maps.Size(25, 41),
-          anchor: new naver.maps.Point(12, 41)
+          size: new naver.maps.Size(30, 30),
+          anchor: new naver.maps.Point(15, 30)
         };
       }
 
-      // 마커와 팝업을 업데이트 합니다.
-      // 이때 기존의 scroll position을 보존하는 처리를 합니다.
+      // 마커와 팝업을 업데이트합니다. (이때 내부 스크롤 위치 보존)
       function updateMarkerIcon(group) {
         group.marker.setIcon(getCustomDivIcon(group));
         if (group.infoWindow) {
@@ -226,7 +234,7 @@
       }
       window.handleCheckboxChange = handleCheckboxChange;
 
-      // 아이템 클릭 처리 (체크박스 상태 토글)
+      // 아이템 클릭 처리 (체크박스 토글)
       function handleItemClick(event, groupIndex, itemIndex) {
         const group = markerGroups[groupIndex];
         group.data[itemIndex].visited = !group.data[itemIndex].visited;
@@ -236,7 +244,17 @@
       }
       window.handleItemClick = handleItemClick;
 
-      // 맵 초기화 및 마커 추가 (parsed.json 파일로부터 데이터를 가져옴)
+      // 내 위치로 지도 중심 이동 함수 (200미터 반경을 보이도록 적절한 줌 설정)
+      function centerOnMyLocation() {
+        if (mobileMarker && map) {
+          const pos = mobileMarker.getPosition();
+          map.setCenter(pos);
+          // 일반적으로 줌 17에서 약 200미터 반경이 보입니다.
+          map.setZoom(17);
+        }
+      }
+
+      // 맵 초기화 및 마커 추가 (parsed.json 파일 데이터 사용)
       function initMap() {
         fetch("parsed.json")
           .then((response) => response.json())
@@ -274,7 +292,7 @@
             const avgLat = sumLat / markerGroups.length;
             const avgLon = sumLon / markerGroups.length;
 
-            // Naver Map 생성 (줌 레벨 13)
+            // Naver Map 생성 (초기 줌 레벨 13)
             map = new naver.maps.Map("map", {
               center: new naver.maps.LatLng(avgLat, avgLon),
               zoom: 13,
@@ -313,11 +331,10 @@
                     delete group.infoWindow.justOpened;
                   }, 100);
 
-                  // 마커가 화면 상단에 위치하면 지도를 아래로 pan
+                  // 팝업 표시 후, 마커가 화면 상단에 있는 경우 지도를 아래로 pan 처리
                   setTimeout(() => {
                     if (map.getProjection) {
                       const markerPoint = map.getProjection().fromCoordToOffset(group.marker.getPosition());
-                      const mapRect = document.getElementById("map").getBoundingClientRect();
                       if (markerPoint.y < 150) {
                         const offsetY = 150 - markerPoint.y + 50;
                         map.panBy(0, offsetY);
@@ -365,10 +382,11 @@
                   position: currentLatLng,
                   map: map,
                   icon: {
-                    content: '<div style="color: white; background: blue; border-radius: 50%; width: 20px; height: 20px; text-align: center; line-height: 20px;">Me</div>',
+                    content:
+                      '<div style="color: white; background: #007bff; border-radius: 50%; width: 20px; height: 20px; text-align: center; line-height: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">Me</div>',
                     size: new naver.maps.Size(20, 20),
-                    anchor: new naver.maps.Point(10, 10)
-                  }
+                    anchor: new naver.maps.Point(10, 10),
+                  },
                 });
               } else {
                 mobileMarker.setPosition(currentLatLng);
@@ -379,13 +397,13 @@
             },
             {
               enableHighAccuracy: true,
-              maximumAge: 0
+              maximumAge: 0,
             }
           );
         }
       }
 
-      // 상단의 전체 방문 확인 / 해제 버튼 처리
+      // 상단의 전체 방문 확인 / 해제 버튼 이벤트 처리
       document.getElementById("checkAll").addEventListener("click", () => {
         markerGroups.forEach((group) => {
           group.data.forEach((item) => (item.visited = true));
@@ -402,6 +420,9 @@
         saveVisitedState();
         updateVisitCounter();
       });
+
+      // "현재 내 위치로" 버튼 이벤트 처리
+      document.getElementById("centerLocation").addEventListener("click", centerOnMyLocation);
 
       // 정보 다이얼로그 표시 함수
       function showInfoDialog(message) {
