@@ -58,7 +58,7 @@
         top: 0;
         left: 50%;
         transform: translateX(-50%);
-        background: rgba(0, 0, 0, 0.8);
+        background: rgba(0,0,0,0.8);
         color: white;
         padding: 10px 20px;
         border-radius: 4px;
@@ -105,7 +105,7 @@
       <button id="checkAll">전체 방문 확인</button>
       <button id="uncheckAll">전체 방문 해제</button>
       <button id="centerLocation" title="현재 내 위치로 이동">
-        <!-- 간단한 SVG 아이콘 (예: 방향 아이콘) -->
+        <!-- 간단한 SVG 아이콘 -->
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M8 0C3.58 0 0 3.58 0 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm3.93 4.67l-1.41 1.41L10.83 7H8v2h2.83l.69.69 1.41-1.41L9.41 7l2.52-2.33zM8 14C4.13 14 2 11.87 2 8c0-1.74.8-3.27 2.07-4.33l1.41 1.41C4.34 6.08 4 7 4 8c0 2.21 1.79 4 4 4 1 0 1.92-.34 2.25-.68l1.41 1.41C11.27 13.2 9.74 14 8 14z" fill="white"/>
         </svg>
@@ -117,7 +117,7 @@
       let map;
       let markerGroups = []; // 좌표별 그룹: 그룹당 다수의 장소 정보를 포함
       const STORAGE_KEY = "visitedState";
-      let mobileMarker = null;  // 모바일 기기의 현재 위치 마커
+      let mobileMarker = null;  // 모바일 기기 현재 위치 마커
 
       // 방문 상태 저장
       function saveVisitedState() {
@@ -175,36 +175,50 @@
         return content;
       }
 
-      // 커스텀 마커 아이콘 (HTML 컨텐츠로 구성)
+      // 커스텀 장소 핀 아이콘: 변경 없이 기존 스타일을 유지합니다.
       function getCustomDivIcon(group) {
         const allVisited = group.data.every((item) => item.visited);
-        let fillColor = "";
+        let color, opacity;
         if (allVisited) {
-          fillColor = "grey";
+          color = "grey";
+          opacity = 0.6;
         } else {
-          fillColor = group.data.length > 1 ? "red" : "blue";
+          opacity = 1.0;
+          color = group.data.length > 1 ? "red" : "blue";
         }
-        let extraText = group.data.length > 1 ? group.data.length : "";
+        let iconUrl = "";
+        if (color === "grey")
+          iconUrl = "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png";
+        else if (color === "red")
+          iconUrl = "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png";
+        else
+          iconUrl = "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png";
+  
+        let countText = group.data.length > 1 ? group.data.length : "";
         const html = `
-          <div style="position: relative; width: 30px; height: 30px;">
-            <div style="background: ${fillColor}; border: 2px solid white; border-radius: 50%; width: 30px; height: 30px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"></div>
+          <div style="position: relative; width: 25px; height: 41px;">
+            <img src="${iconUrl}" style="width: 25px; height: 41px; opacity: ${opacity};" />
             ${
-              extraText
-                ? `<div style="position: absolute; top: 0; left: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
-                    ${extraText}
-                  </div>`
+              countText
+                ? `<div style="position: absolute; top: 0; left: 0; width: 25px; height: 41px; display: flex; align-items: center; justify-content: center;">
+                      <div style="background: rgba(0,0,0,0.4); border-radius: 50%; padding: 2px 4px; margin-top: -4px;">
+                        <span style="font-weight: bold; color: white; font-size: 12px; text-shadow: 1px 1px 2px black;">
+                          ${countText}
+                        </span>
+                      </div>
+                   </div>`
                 : ""
             }
           </div>
         `;
         return {
           content: html,
-          size: new naver.maps.Size(30, 30),
-          anchor: new naver.maps.Point(15, 30)
+          size: new naver.maps.Size(25, 41),
+          anchor: new naver.maps.Point(12, 41)
         };
       }
 
-      // 마커와 팝업을 업데이트합니다. (이때 내부 스크롤 위치 보존)
+      // 마커와 팝업을 업데이트합니다. (내부 스크롤 위치 보존)
       function updateMarkerIcon(group) {
         group.marker.setIcon(getCustomDivIcon(group));
         if (group.infoWindow) {
@@ -244,12 +258,12 @@
       }
       window.handleItemClick = handleItemClick;
 
-      // 내 위치로 지도 중심 이동 함수 (200미터 반경을 보이도록 적절한 줌 설정)
+      // 내 위치로 지도 중심 이동 함수 (200미터 반경 보이도록 줌 조정)
       function centerOnMyLocation() {
         if (mobileMarker && map) {
           const pos = mobileMarker.getPosition();
           map.setCenter(pos);
-          // 일반적으로 줌 17에서 약 200미터 반경이 보입니다.
+          // 일반적으로 줌 17에서 약 200미터 반경이 보임.
           map.setZoom(17);
         }
       }
@@ -260,7 +274,7 @@
           .then((response) => response.json())
           .then((json) => {
             markerGroups = [];
-            // 그룹화: 동일한 위도, 경도인 항목끼리 하나의 그룹으로 처리
+            // 그룹화: 동일한 위도, 경도인 항목을 하나의 그룹으로 처리
             json.data.forEach((entry) => {
               const key = entry.lat + "," + entry.lon;
               let group = markerGroups.find((g) => g.key === key);
@@ -307,7 +321,7 @@
               });
 
               // 마커 클릭 이벤트: 팝업 생성 또는 업데이트
-              naver.maps.Event.addListener(group.marker, "click", function (e) {
+              naver.maps.Event.addListener(group.marker, "click", function () {
                 // 모든 InfoWindow 닫기
                 markerGroups.forEach((g) => {
                   if (g.infoWindow && !g.infoWindow.justOpened) {
@@ -331,7 +345,7 @@
                     delete group.infoWindow.justOpened;
                   }, 100);
 
-                  // 팝업 표시 후, 마커가 화면 상단에 있는 경우 지도를 아래로 pan 처리
+                  // 팝업 표시 후, 마커가 화면 상단에 있으면 지도 아래로 pan 처리
                   setTimeout(() => {
                     if (map.getProjection) {
                       const markerPoint = map.getProjection().fromCoordToOffset(group.marker.getPosition());
@@ -370,7 +384,7 @@
             console.error("data load error:", err);
           });
 
-        // 모바일 기기의 현재 위치를 실시간으로 지도에 표시
+        // 모바일 기기의 현재 위치를 실시간으로 지도에 표시 (내 위치 표시용 마커 디자인 변경)
         if (navigator.geolocation) {
           navigator.geolocation.watchPosition(
             function (position) {
@@ -382,11 +396,17 @@
                   position: currentLatLng,
                   map: map,
                   icon: {
-                    content:
-                      '<div style="color: white; background: #007bff; border-radius: 50%; width: 20px; height: 20px; text-align: center; line-height: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">Me</div>',
-                    size: new naver.maps.Size(20, 20),
-                    anchor: new naver.maps.Point(10, 10),
-                  },
+                    content: `<div style="
+                              width: 25px;
+                              height: 25px;
+                              border: 3px solid white;
+                              background: radial-gradient(circle, #00c6ff 0%, #0072ff 100%);
+                              border-radius: 50%;
+                              box-shadow: 0px 3px 6px rgba(0,0,0,0.3);
+                              "></div>`,
+                    size: new naver.maps.Size(25, 25),
+                    anchor: new naver.maps.Point(12, 12)
+                  }
                 });
               } else {
                 mobileMarker.setPosition(currentLatLng);
