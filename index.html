@@ -1,95 +1,95 @@
 <!DOCTYPE html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>네이버 지도 생성기</title>
-    <!-- Naver Maps API (반드시 YOUR_CLIENT_ID를 실제 네이버 클라이언트 ID로 교체하세요) -->
-    <script src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=9w0x686rje"></script>
-    <style>
-      html,
-      body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-      }
-      #map {
-        height: 100%;
-        width: 100%;
-      }
-      /* 컨트롤 버튼 및 방문 카운터 스타일 */
-      #controls {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        z-index: 1100;
-        background: white;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-      #visitCounter {
-        font-size: 14px;
-        font-weight: bold;
-      }
-      /* 정보 다이얼로그 스타일 */
-      #infoDialog {
-        position: fixed;
-        top: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(0,0,0,0.8);
-        color: white;
-        padding: 10px 20px;
-        border-radius: 4px;
-        z-index: 1200;
-        font-size: 16px;
-        display: none;
-      }
-      /* 팝업 내 아이템 박스 - 기존 디자인 유지 */
-      .item-box {
-        position: relative;
-        padding: 10px 40px 10px 10px;
-        margin-bottom: 10px;
-        cursor: pointer;
-        user-select: none;
-        border: 1px solid #ccc;
-      }
-      .item-box input[type="checkbox"] {
-        position: absolute;
-        bottom: 5px;
-        right: 5px;
-        transform: scale(1.5);
-        cursor: pointer;
-        z-index: 2;
-      }
-      .item-box div {
-        word-wrap: break-word;
-      }
-      /* 팝업 전체 컨테이너 - 스크롤 및 최대 높이 */
-      .popup-container {
-        cursor: default;
-        overflow-y: auto;
-        max-height: 400px;
-      }
-    </style>
-  </head>
-  <body>
-    <!-- 상단 정보 다이얼로그 -->
-    <div id="infoDialog"></div>
-    <!-- 지도 표시 영역 -->
-    <div id="map"></div>
-    <!-- 전체 방문 제어 및 방문 카운터 -->
-    <div id="controls">
-      <button id="checkAll">전체 방문 확인</button>
-      <button id="uncheckAll">전체 방문 해제</button>
-      <span id="visitCounter">0 / 0</span>
-    </div>
-    <!-- JSON 데이터 (마커/장소 정보) -->
-    <script id="data" type="application/json">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>네이버 지도 생성기</title>
+  <!-- Naver Maps API (반드시 YOUR_CLIENT_ID를 실제 네이버 클라이언트 ID로 교체하세요) -->
+  <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=9w0x686rje"></script>
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    #map {
+      height: 100%;
+      width: 100%;
+    }
+    /* 컨트롤 버튼 및 방문 카운터 스타일 */
+    #controls {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1100;
+      background: white;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #visitCounter {
+      font-size: 14px;
+      font-weight: bold;
+    }
+    /* 정보 다이얼로그 스타일 */
+    #infoDialog {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 4px;
+      z-index: 1200;
+      font-size: 16px;
+      display: none;
+    }
+    /* 팝업 내 아이템 박스 - 기존 디자인 유지 */
+    .item-box {
+      position: relative;
+      padding: 10px 40px 10px 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      user-select: none;
+      border: 1px solid #ccc;
+    }
+    .item-box input[type="checkbox"] {
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      transform: scale(1.5);
+      cursor: pointer;
+      z-index: 2;
+    }
+    .item-box div {
+      word-wrap: break-word;
+    }
+    /* 팝업 전체 컨테이너 - 스크롤 및 최대 높이 */
+    .popup-container {
+      cursor: default;
+      overflow-y: auto;
+      max-height: 400px;
+    }
+  </style>
+</head>
+<body>
+  <!-- 상단 정보 다이얼로그 -->
+  <div id="infoDialog"></div>
+  <!-- 지도 표시 영역 -->
+  <div id="map"></div>
+  <!-- 전체 방문 제어 및 방문 카운터 -->
+  <div id="controls">
+    <button id="checkAll">전체 방문 확인</button>
+    <button id="uncheckAll">전체 방문 해제</button>
+    <span id="visitCounter">0 / 0</span>
+  </div>
+  <!-- JSON 데이터 (마커/장소 정보) -->
+  <script id="data" type="application/json">
 {
   "data": [
     {
@@ -5652,247 +5652,274 @@
     }
   ]
 }
-    </script>
-    <script>
-      // 전역 변수
-      let map;
-      let markerGroups = []; // 좌표별 그룹: 그룹당 다수의 장소 정보를 포함
-      const STORAGE_KEY = "visitedState";
-      
-      // 방문 상태 저장
-      function saveVisitedState() {
-        const state = {};
-        markerGroups.forEach((group) => {
-          state[group.key] = group.data.map((item) => item.visited);
-        });
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      }
-      
-      // 방문 상태 불러오기
-      function loadVisitedState() {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-          try {
-            return JSON.parse(stored);
-          } catch (e) {
-            return null;
-          }
+  </script>
+  <script>
+    // 전역 변수
+    let map;
+    let markerGroups = []; // 좌표별 그룹: 그룹당 다수의 장소 정보를 포함
+    const STORAGE_KEY = "visitedState";
+
+    // 방문 상태 저장
+    function saveVisitedState() {
+      const state = {};
+      markerGroups.forEach((group) => {
+        state[group.key] = group.data.map((item) => item.visited);
+      });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    // 방문 상태 불러오기
+    function loadVisitedState() {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        try {
+          return JSON.parse(stored);
+        } catch (e) {
+          return null;
         }
-        return null;
       }
-      
-      // 방문 카운터 업데이트
-      function updateVisitCounter() {
-        const totalItems = markerGroups.reduce((count, group) => count + group.data.length, 0);
-        const visitedItems = markerGroups.reduce(
-          (count, group) => count + group.data.filter((item) => item.visited).length,
-          0
-        );
-        document.getElementById("visitCounter").textContent = `${visitedItems} / ${totalItems}`;
-      }
-      
-      // 팝업 컨텐츠 생성 (툴팁 내용)
-      function createPopupContent(group, groupIndex) {
-        let content = '<div class="popup-container" onclick="event.stopPropagation()">';
-        group.data.forEach((item, index) => {
-          content += `
-            <div class="item-box" onclick="handleItemClick(event, ${groupIndex}, ${index})">
-              <div>
-                <strong>${item.name}</strong><br/>
-                <em>대표자명: ${item.owner}</em><br/>
-                ${item.address}
-              </div>
-              <input type="checkbox"
-                     data-group-index="${groupIndex}"
-                     data-item-index="${index}"
-                     ${item.visited ? "checked" : ""}
-                     onclick="event.stopPropagation(); handleCheckboxChange(event)" />
+      return null;
+    }
+
+    // 방문 카운터 업데이트
+    function updateVisitCounter() {
+      const totalItems = markerGroups.reduce((count, group) => count + group.data.length, 0);
+      const visitedItems = markerGroups.reduce(
+        (count, group) => count + group.data.filter((item) => item.visited).length,
+        0
+      );
+      document.getElementById("visitCounter").textContent = `${visitedItems} / ${totalItems}`;
+    }
+
+    // 팝업 컨텐츠 생성 (툴팁 내용)
+    function createPopupContent(group, groupIndex) {
+      let content = '<div class="popup-container" onclick="event.stopPropagation()">';
+      group.data.forEach((item, index) => {
+        content += `
+          <div class="item-box" onclick="handleItemClick(event, ${groupIndex}, ${index})">
+            <div>
+              <strong>${item.name}</strong><br/>
+              <em>대표자명: ${item.owner}</em><br/>
+              ${item.address}
             </div>
-          `;
-        });
-        content += "</div>";
-        return content;
-      }
-      
-      // 커스텀 마커 아이콘 (HTML 컨텐츠로 구성)
-      function getCustomDivIcon(group) {
-        const allVisited = group.data.every((item) => item.visited);
-        let color, opacity;
-        if (allVisited) {
-          color = "grey";
-          opacity = 0.6;
-        } else {
-          opacity = 1.0;
-          color = group.data.length > 1 ? "red" : "blue";
-        }
-        let iconUrl = "";
-        if (color === "grey")
-          iconUrl = "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png";
-        else if (color === "red")
-          iconUrl = "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png";
-        else
-          iconUrl = "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png";
-        
-        let countText = group.data.length > 1 ? group.data.length : "";
-        const html = `
-          <div style="position: relative; width: 25px; height: 41px;">
-            <img src="${iconUrl}" style="width: 25px; height: 41px; opacity: ${opacity};" />
-            ${
-              countText
-                ? `<div style="position: absolute; top: 0; left: 0; width: 25px; height: 41px; display: flex; align-items: center; justify-content: center;">
-                      <div style="background: rgba(0,0,0,0.4); border-radius: 50%; padding: 2px 4px; margin-top: -4px;">
-                        <span style="font-weight: bold; color: white; font-size: 12px; text-shadow: 1px 1px 2px black;">
-                          ${countText}
-                        </span>
-                      </div>
-                  </div>`
-                : ""
-            }
+            <input type="checkbox"
+                   data-group-index="${groupIndex}"
+                   data-item-index="${index}"
+                   ${item.visited ? "checked" : ""}
+                   onclick="event.stopPropagation(); handleCheckboxChange(event)" />
           </div>
         `;
-        return {
-          content: html,
-          size: new naver.maps.Size(25, 41),
-          anchor: new naver.maps.Point(12, 41)
-        };
+      });
+      content += "</div>";
+      return content;
+    }
+
+    // 커스텀 마커 아이콘 (HTML 컨텐츠로 구성)
+    function getCustomDivIcon(group) {
+      const allVisited = group.data.every((item) => item.visited);
+      let color, opacity;
+      if (allVisited) {
+        color = "grey";
+        opacity = 0.6;
+      } else {
+        opacity = 1.0;
+        color = group.data.length > 1 ? "red" : "blue";
       }
-      
-      // 마커와 팝업을 업데이트 합니다.
-      function updateMarkerIcon(group) {
-        // 업데이트된 아이콘 적용
-        group.marker.setIcon(getCustomDivIcon(group));
-        // 팝업이 열려 있는 경우 내용 업데이트
-        if (group.infoWindow) {
-          const newContent = createPopupContent(group, markerGroups.indexOf(group));
-          group.infoWindow.setContent(newContent);
-        }
-      }
-      
-      // 체크박스 클릭 처리
-      function handleCheckboxChange(event) {
-        const groupIndex = event.target.getAttribute("data-group-index");
-        const itemIndex = event.target.getAttribute("data-item-index");
-        const group = markerGroups[groupIndex];
-        group.data[itemIndex].visited = event.target.checked;
-        updateMarkerIcon(group);
-        saveVisitedState();
-        updateVisitCounter();
-      }
-      window.handleCheckboxChange = handleCheckboxChange;
-      
-      // 아이템 클릭 처리 (체크박스 상태 토글)
-      function handleItemClick(event, groupIndex, itemIndex) {
-        const group = markerGroups[groupIndex];
-        group.data[itemIndex].visited = !group.data[itemIndex].visited;
-        updateMarkerIcon(group);
-        saveVisitedState();
-        updateVisitCounter();
-      }
-      window.handleItemClick = handleItemClick;
-      
-      // 맵 초기화 및 마커 추가
-      function initMap() {
-        const json = JSON.parse(document.getElementById("data").textContent);
-        markerGroups = [];
-        // 그룹화: 동일한 위도, 경도인 항목끼리 하나의 그룹으로 처리
-        json.data.forEach((entry) => {
-          const key = entry.lat + "," + entry.lon;
-          let group = markerGroups.find((g) => g.key === key);
-          if (!group) {
-            group = { key: key, lat: parseFloat(entry.lat), lon: parseFloat(entry.lon), data: [] };
-            markerGroups.push(group);
+      let iconUrl = "";
+      if (color === "grey")
+        iconUrl = "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png";
+      else if (color === "red")
+        iconUrl = "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png";
+      else
+        iconUrl = "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png";
+
+      let countText = group.data.length > 1 ? group.data.length : "";
+      const html = `
+        <div style="position: relative; width: 25px; height: 41px;">
+          <img src="${iconUrl}" style="width: 25px; height: 41px; opacity: ${opacity};" />
+          ${
+            countText
+              ? `<div style="position: absolute; top: 0; left: 0; width: 25px; height: 41px; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: rgba(0,0,0,0.4); border-radius: 50%; padding: 2px 4px; margin-top: -4px;">
+                      <span style="font-weight: bold; color: white; font-size: 12px; text-shadow: 1px 1px 2px black;">
+                        ${countText}
+                      </span>
+                    </div>
+                </div>`
+              : ""
           }
-          group.data.push({ name: entry.name, owner: entry.owner, address: entry.address, visited: false });
-        });
-        // 기존에 저장된 방문 상태 불러오기
-        const storedState = loadVisitedState();
-        if (storedState) {
-          markerGroups.forEach((group) => {
-            if (storedState[group.key] && storedState[group.key].length === group.data.length) {
-              group.data.forEach((item, index) => {
-                item.visited = storedState[group.key][index];
-              });
-            }
-          });
+        </div>
+      `;
+      return {
+        content: html,
+        size: new naver.maps.Size(25, 41),
+        anchor: new naver.maps.Point(12, 41)
+      };
+    }
+
+    // 마커와 팝업을 업데이트 합니다.
+    function updateMarkerIcon(group) {
+      // 업데이트된 아이콘 적용
+      group.marker.setIcon(getCustomDivIcon(group));
+      // 팝업이 열려 있는 경우 내용 업데이트
+      if (group.infoWindow) {
+        const newContent = createPopupContent(group, markerGroups.indexOf(group));
+        group.infoWindow.setContent(newContent);
+      }
+    }
+
+    // 체크박스 클릭 처리
+    function handleCheckboxChange(event) {
+      const groupIndex = event.target.getAttribute("data-group-index");
+      const itemIndex = event.target.getAttribute("data-item-index");
+      const group = markerGroups[groupIndex];
+      group.data[itemIndex].visited = event.target.checked;
+      updateMarkerIcon(group);
+      saveVisitedState();
+      updateVisitCounter();
+    }
+    window.handleCheckboxChange = handleCheckboxChange;
+
+    // 아이템 클릭 처리 (체크박스 상태 토글)
+    function handleItemClick(event, groupIndex, itemIndex) {
+      const group = markerGroups[groupIndex];
+      group.data[itemIndex].visited = !group.data[itemIndex].visited;
+      updateMarkerIcon(group);
+      saveVisitedState();
+      updateVisitCounter();
+    }
+    window.handleItemClick = handleItemClick;
+
+    // 맵 초기화 및 마커 추가
+    function initMap() {
+      const json = JSON.parse(document.getElementById("data").textContent);
+      markerGroups = [];
+      // 그룹화: 동일한 위도, 경도인 항목끼리 하나의 그룹으로 처리
+      json.data.forEach((entry) => {
+        const key = entry.lat + "," + entry.lon;
+        let group = markerGroups.find((g) => g.key === key);
+        if (!group) {
+          group = { key: key, lat: parseFloat(entry.lat), lon: parseFloat(entry.lon), data: [] };
+          markerGroups.push(group);
         }
-        updateVisitCounter();
-        
-        // 평균 좌표 계산
-        let sumLat = 0, sumLon = 0;
+        group.data.push({ name: entry.name, owner: entry.owner, address: entry.address, visited: false });
+      });
+      // 기존에 저장된 방문 상태 불러오기
+      const storedState = loadVisitedState();
+      if (storedState) {
         markerGroups.forEach((group) => {
-          sumLat += group.lat;
-          sumLon += group.lon;
+          if (storedState[group.key] && storedState[group.key].length === group.data.length) {
+            group.data.forEach((item, index) => {
+              item.visited = storedState[group.key][index];
+            });
+          }
         });
-        const avgLat = sumLat / markerGroups.length;
-        const avgLon = sumLon / markerGroups.length;
-        
-        // Naver Map 생성
-        map = new naver.maps.Map("map", {
-          center: new naver.maps.LatLng(avgLat, avgLon),
-          zoom: 10
+      }
+      updateVisitCounter();
+
+      // 평균 좌표 계산
+      let sumLat = 0, sumLon = 0;
+      markerGroups.forEach((group) => {
+        sumLat += group.lat;
+        sumLon += group.lon;
+      });
+      const avgLat = sumLat / markerGroups.length;
+      const avgLon = sumLon / markerGroups.length;
+
+      // Naver Map 생성
+      map = new naver.maps.Map("map", {
+        center: new naver.maps.LatLng(avgLat, avgLon),
+        zoom: 10
+      });
+
+      // 각 그룹마다 마커 생성 및 클릭 시 팝업(InfoWindow) 오픈
+      markerGroups.forEach((group, index) => {
+        group.marker = new naver.maps.Marker({
+          position: new naver.maps.LatLng(group.lat, group.lon),
+          map: map,
+          icon: getCustomDivIcon(group)
         });
-        
-        // 각 그룹마다 마커 생성 및 클릭 시 팝업 오픈
-        markerGroups.forEach((group, index) => {
-          group.marker = new naver.maps.Marker({
-            position: new naver.maps.LatLng(group.lat, group.lon),
-            map: map,
-            icon: getCustomDivIcon(group)
-          });
-          
-          // 마커 클릭 이벤트: 팝업(InfoWindow) 생성 또는 업데이트 후 오픈
-          naver.maps.Event.addListener(group.marker, 'click', function() {
-            // 만약 이미 열린 팝업이 있으면 닫기 처리
-            if (group.infoWindow) {
-              group.infoWindow.close();
-              group.infoWindow = null;
-            } else {
-              const content = createPopupContent(group, index);
-              group.infoWindow = new naver.maps.InfoWindow({
-                content: content,
-                disableAnchor: true
-              });
-              group.infoWindow.open(map, group.marker);
-              // InfoWindow close 시 참조 초기화
-              naver.maps.Event.addListener(group.infoWindow, 'closeclick', function() {
-                group.infoWindow = null;
-              });
+
+        // 마커 클릭 이벤트: 팝업(InfoWindow) 생성 또는 업데이트 후 오픈
+        naver.maps.Event.addListener(group.marker, 'click', function(e) {
+          // 먼저, 닫혀있는 모든 InfoWindow를 닫습니다.
+          markerGroups.forEach(g => {
+            if (g.infoWindow && !g.infoWindow.justOpened) {
+              g.infoWindow.close();
+              g.infoWindow = null;
             }
           });
+
+          // 만약 이미 열린 팝업이 있으면 닫기 처리
+          if (group.infoWindow) {
+            group.infoWindow.close();
+            group.infoWindow = null;
+          } else {
+            const content = createPopupContent(group, index);
+            group.infoWindow = new naver.maps.InfoWindow({
+              content: content,
+              disableAnchor: true
+            });
+            group.infoWindow.open(map, group.marker);
+            // Flag this infoWindow as "justOpened" to prevent immediate closure by the document click handler.
+            group.infoWindow.justOpened = true;
+            setTimeout(() => {
+              delete group.infoWindow.justOpened;
+            }, 100);
+            // InfoWindow close 시 참조 초기화
+            naver.maps.Event.addListener(group.infoWindow, 'closeclick', function() {
+              group.infoWindow = null;
+            });
+          }
         });
-        
-        const totalItems = markerGroups.reduce((count, group) => count + group.data.length, 0);
-        showInfoDialog(`전체 ${totalItems}개의 장소가 로드되었습니다.`);
-        saveVisitedState();
-      }
-      
-      // 상단의 전체 방문 확인 / 해제 버튼 처리
-      document.getElementById("checkAll").addEventListener("click", () => {
-        markerGroups.forEach((group) => {
-          group.data.forEach((item) => item.visited = true);
-          updateMarkerIcon(group);
-        });
-        saveVisitedState();
-        updateVisitCounter();
       });
-      document.getElementById("uncheckAll").addEventListener("click", () => {
+
+      // 전역적으로 (툴팁 외부 클릭 시) 모든 InfoWindow를 닫는 document 클릭 핸들러 추가
+      document.addEventListener('click', function(e) {
+        // 만약 클릭한 영역이 InfoWindow(툴팁) 내부라면 무시.
+        if (e.target.closest('.popup-container')) return;
+
+        // 그 외 영역 클릭 시 열린 InfoWindow가 있으면 닫음.
         markerGroups.forEach((group) => {
-          group.data.forEach((item) => item.visited = false);
-          updateMarkerIcon(group);
+          if (group.infoWindow && !group.infoWindow.justOpened) {
+            group.infoWindow.close();
+            group.infoWindow = null;
+          }
         });
-        saveVisitedState();
-        updateVisitCounter();
       });
-      
-      // 간단한 정보 다이얼로그 표시 함수
-      function showInfoDialog(message) {
-        const dialog = document.getElementById("infoDialog");
-        dialog.innerText = message;
-        dialog.style.display = "block";
-        setTimeout(() => { dialog.style.display = "none"; }, 3000);
-      }
-      
-      window.onload = initMap;
-    </script>
-  </body>
+
+      const totalItems = markerGroups.reduce((count, group) => count + group.data.length, 0);
+      showInfoDialog(`전체 ${totalItems}개의 장소가 로드되었습니다.`);
+      saveVisitedState();
+    }
+
+    // 상단의 전체 방문 확인 / 해제 버튼 처리
+    document.getElementById("checkAll").addEventListener("click", () => {
+      markerGroups.forEach((group) => {
+        group.data.forEach((item) => item.visited = true);
+        updateMarkerIcon(group);
+      });
+      saveVisitedState();
+      updateVisitCounter();
+    });
+    document.getElementById("uncheckAll").addEventListener("click", () => {
+      markerGroups.forEach((group) => {
+        group.data.forEach((item) => item.visited = false);
+        updateMarkerIcon(group);
+      });
+      saveVisitedState();
+      updateVisitCounter();
+    });
+
+    // 간단한 정보 다이얼로그 표시 함수
+    function showInfoDialog(message) {
+      const dialog = document.getElementById("infoDialog");
+      dialog.innerText = message;
+      dialog.style.display = "block";
+      setTimeout(() => { dialog.style.display = "none"; }, 3000);
+    }
+
+    window.onload = initMap;
+  </script>
+</body>
 </html>
