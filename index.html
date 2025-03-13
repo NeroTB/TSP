@@ -17,7 +17,7 @@
         height: 100%;
         width: 100%;
       }
-      /* 컨트롤 버튼 및 방문 카운터 스타일 */
+      /* 상단 컨트롤바 스타일 */
       #controls {
         position: absolute;
         top: 10px;
@@ -36,7 +36,7 @@
         background: none;
         cursor: pointer;
       }
-      /* "현재 내 위치로 이동" 버튼: GPS 아이콘 추가 */
+      /* 현재 내 위치 이동 버튼 (GPS 아이콘 포함) */
       #centerLocation {
         width: 30px;
         height: 30px;
@@ -47,29 +47,12 @@
         justify-content: center;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
       }
-      /* GPS 아이콘 스타일 */
       #centerLocation svg {
         width: 18px;
         height: 18px;
         fill: white;
       }
-      /* 고급 버튼 토글 아이콘 스타일 */
-      #advancedToggle {
-        width: 30px;
-        height: 30px;
-        background: #28a745;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        color: white;
-      }
-      #advancedToggle svg {
-        width: 18px;
-        height: 18px;
-        fill: white;
-      }
+      /* 방문 카운터 스타일 */
       #visitCounter {
         font-size: 14px;
         font-weight: bold;
@@ -88,7 +71,7 @@
         font-size: 16px;
         display: none;
       }
-      /* 팝업 내 아이템 박스 - 기존 디자인 유지 */
+      /* 팝업 내 아이템 박스 (툴팁) 스타일 */
       .item-box {
         position: relative;
         padding: 10px 40px 10px 10px;
@@ -108,12 +91,47 @@
       .item-box div {
         word-wrap: break-word;
       }
-      /* 팝업 전체 컨테이너 - 스크롤, 최대 높이, 및 최대 너비 (화면 너비보다 약간 작게) */
+      /* 팝업 컨테이너: 최대 높이와 너비 제한 */
       .popup-container {
         cursor: default;
         overflow-y: auto;
         max-height: 400px;
         max-width: calc(100vw - 20px);
+      }
+      /* 고급 컨트롤 패널 (전체 방문 확인, 해제) */
+      #advancedPanel {
+        position: absolute;
+        top: 10px;
+        right: -200px; /* hidden off screen */
+        width: 180px;
+        background: #f9f9f9;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 10px;
+        box-shadow: -2px 2px 6px rgba(0,0,0,0.3);
+        transition: right 0.3s;
+        z-index: 1100;
+      }
+      /* 고급 패널 토글 버튼 (화살표 모양) */
+      #panelToggle {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 20px;
+        height: 40px;
+        background: #28a745;
+        border-radius: 4px 0 0 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 1150;
+      }
+      #panelToggle svg {
+        width: 16px;
+        height: 16px;
+        fill: white;
+        transition: transform 0.3s;
       }
     </style>
   </head>
@@ -122,17 +140,8 @@
     <div id="infoDialog"></div>
     <!-- 지도 표시 영역 -->
     <div id="map"></div>
-    <!-- 전체 방문 제어 및 방문 카운터, 현재 내 위치 이동 버튼, 그리고 고급 버튼을 활성화하는 토글 버튼 추가 -->
+    <!-- 상단 패널: 기본 컨트롤 버튼 -->
     <div id="controls">
-      <!-- 고급 버튼 토글: 기본적으로 전체 방문 버튼은 숨김 -->
-      <button id="advancedToggle" title="고급 버튼 활성화">
-        <!-- SVG (예: 톱니바퀴 아이콘) -->
-        <svg viewBox="0 0 24 24">
-          <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zm7.43-3a5.517 5.517 0 0 0-.14-1l2.02-1.57a.5.5 0 0 0 .12-.66l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.38.96a5.507 5.507 0 0 0-1.73-1l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54a5.507 5.507 0 0 0-1.73 1l-2.38-.96a.5.5 0 0 0-.61.22L2.4 8.83a.5.5 0 0 0 .12.66l2.02 1.57a5.517 5.517 0 0 0-.14 1 5.5 5.5 0 0 0 0 2l-2.02 1.57a.5.5 0 0 0-.12.66l1.92 3.32a.5.5 0 0 0 .61.22l2.38-.96c.52.41 1.09.76 1.73 1l.36 2.54a.5.5 0 0 0 .5.42h3.84a.5.5 0 0 0 .5-.42l.36-2.54c.64-.24 1.21-.59 1.73-1l2.38.96a.5.5 0 0 0 .61-.22l1.92-3.32a.5.5 0 0 0-.12-.66l-2.02-1.57c.09-.33.14-.67.14-1s-.05-.67-.14-1z"/>
-        </svg>
-      </button>
-      <button id="checkAll" style="display: none;">전체 방문 확인</button>
-      <button id="uncheckAll" style="display: none;">전체 방문 해제</button>
       <button id="centerLocation" title="현재 내 위치로 이동">
         <!-- GPS 아이콘 SVG -->
         <svg viewBox="0 0 24 24">
@@ -140,6 +149,18 @@
         </svg>
       </button>
       <span id="visitCounter">0 / 0</span>
+    </div>
+    <!-- 고급 패널 토글 버튼 (화살표 아이콘) -->
+    <div id="panelToggle" title="고급 버튼 보이기/숨기기">
+      <!-- 우측으로 열리는 화살표 SVG, 회전 효과로 토글 표시 -->
+      <svg viewBox="0 0 24 24">
+        <path d="M8.59 16.34L13.17 12 8.59 7.66 10 6.25l6 6-6 6z"/>
+      </svg>
+    </div>
+    <!-- 고급 컨트롤 패널: 전체 방문 확인, 전체 방문 해제 -->
+    <div id="advancedPanel">
+      <button id="checkAll">전체 방문 확인</button><br/><br/>
+      <button id="uncheckAll">전체 방문 해제</button>
     </div>
     <script>
       // 전역 변수
@@ -181,7 +202,6 @@
       }
 
       // 팝업 컨텐츠 생성 (툴팁 내용)
-      // 각 popup-container에 고유의 id (popup-container-{groupIndex})를 부여합니다.
       function createPopupContent(group, groupIndex) {
         let content = `<div id="popup-container-${groupIndex}" class="popup-container" onclick="event.stopPropagation()">`;
         group.data.forEach((item, index) => {
@@ -204,7 +224,7 @@
         return content;
       }
 
-      // 커스텀 장소 핀 아이콘: 변경 없이 기존 스타일을 유지합니다.
+      // 기존 장소 핀 아이콘 유지 (변경 없음)
       function getCustomDivIcon(group) {
         const allVisited = group.data.every((item) => item.visited);
         let color, opacity;
@@ -222,7 +242,7 @@
           iconUrl = "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png";
         else
           iconUrl = "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png";
-  
+
         let countText = group.data.length > 1 ? group.data.length : "";
         const html = `
           <div style="position: relative; width: 25px; height: 41px;">
@@ -247,7 +267,7 @@
         };
       }
 
-      // 마커와 팝업을 업데이트합니다. (내부 스크롤 위치 보존)
+      // 마커와 팝업 업데이트 (내부 스크롤 보존)
       function updateMarkerIcon(group) {
         group.marker.setIcon(getCustomDivIcon(group));
         if (group.infoWindow) {
@@ -287,36 +307,35 @@
       }
       window.handleItemClick = handleItemClick;
 
-      // 내 위치로 지도 중심 이동 함수 (200미터 반경 보이도록 줌 조정)
+      // 내 위치로 지도 중심 이동 및 줌 (200미터 반경 보이도록 줌 17)
       function centerOnMyLocation() {
         if (mobileMarker && map) {
           const pos = mobileMarker.getPosition();
           map.setCenter(pos);
-          // 일반적으로 줌 17에서 약 200미터 반경이 보임.
           map.setZoom(17);
         }
       }
 
-      // 고급 버튼 토글 처리: "전체 방문 확인"/"전체 방문 해제" 버튼을 토글합니다.
-      function toggleAdvancedButtons() {
-        const checkBtn = document.getElementById("checkAll");
-        const uncheckBtn = document.getElementById("uncheckAll");
-        if (checkBtn.style.display === "none") {
-          checkBtn.style.display = "block";
-          uncheckBtn.style.display = "block";
+      // 고급 버튼 토글: 고급 패널의 위치를 조정하여 보여주거나 숨깁니다.
+      function toggleAdvancedPanel() {
+        const panel = document.getElementById("advancedPanel");
+        const toggleBtn = document.getElementById("panelToggle");
+        if (panel.style.right === "0px") {
+          panel.style.right = "-200px";
+          toggleBtn.querySelector("svg").style.transform = "rotate(0deg)";
         } else {
-          checkBtn.style.display = "none";
-          uncheckBtn.style.display = "none";
+          panel.style.right = "10px";
+          toggleBtn.querySelector("svg").style.transform = "rotate(180deg)";
         }
       }
 
-      // 맵 초기화 및 마커 추가 (parsed.json 파일 데이터 사용)
+      // 맵 초기화 및 마커 추가 (parsed.json 데이터 사용)
       function initMap() {
         fetch("parsed.json")
           .then((response) => response.json())
           .then((json) => {
             markerGroups = [];
-            // 그룹화: 동일한 위도, 경도인 항목을 하나의 그룹으로 처리
+            // 그룹화: 동일한 위도, 경도인 항목을 하나로 묶기
             json.data.forEach((entry) => {
               const key = entry.lat + "," + entry.lon;
               let group = markerGroups.find((g) => g.key === key);
@@ -326,7 +345,7 @@
               }
               group.data.push({ name: entry.name, owner: entry.owner, address: entry.address, visited: false });
             });
-            // 기존 방문 상태 불러오기
+            // 방문 상태 불러오기
             const storedState = loadVisitedState();
             if (storedState) {
               markerGroups.forEach((group) => {
@@ -348,13 +367,13 @@
             const avgLat = sumLat / markerGroups.length;
             const avgLon = sumLon / markerGroups.length;
 
-            // Naver Map 생성 (초기 줌 레벨 13)
+            // Naver Map 생성 (줌 13)
             map = new naver.maps.Map("map", {
               center: new naver.maps.LatLng(avgLat, avgLon),
-              zoom: 13,
+              zoom: 13
             });
 
-            // 각 그룹마다 마커 생성 및 클릭 시 팝업(InfoWindow) 오픈
+            // 각 그룹에 대해 마커 생성, 클릭 시 툴팁 열기
             markerGroups.forEach((group, index) => {
               group.marker = new naver.maps.Marker({
                 position: new naver.maps.LatLng(group.lat, group.lon),
@@ -362,9 +381,8 @@
                 icon: getCustomDivIcon(group),
               });
 
-              // 마커 클릭 이벤트: 팝업 생성 또는 업데이트
               naver.maps.Event.addListener(group.marker, "click", function () {
-                // 모든 InfoWindow 닫기
+                // 모든 열려 있는 InfoWindow 닫기
                 markerGroups.forEach((g) => {
                   if (g.infoWindow && !g.infoWindow.justOpened) {
                     g.infoWindow.close();
@@ -382,10 +400,8 @@
                   });
                   group.infoWindow.open(map, group.marker);
                   group.infoWindow.justOpened = true;
-                  setTimeout(() => {
-                    delete group.infoWindow.justOpened;
-                  }, 100);
-                  // 팝업 표시 후, 마커가 화면 상단에 있으면 지도 아래로 pan 처리
+                  setTimeout(() => { delete group.infoWindow.justOpened; }, 100);
+                  // 팝업이 화면 상단에 있다면 아래로 pan 처리
                   setTimeout(() => {
                     if (map.getProjection) {
                       const markerPoint = map.getProjection().fromCoordToOffset(group.marker.getPosition());
@@ -414,6 +430,7 @@
                 }
               });
             });
+
             const totalItems = markerGroups.reduce((count, group) => count + group.data.length, 0);
             showInfoDialog(`전체 ${totalItems}개의 장소가 로드되었습니다.`);
             saveVisitedState();
@@ -422,7 +439,7 @@
             console.error("data load error:", err);
           });
 
-        // 모바일 기기의 현재 위치를 실시간으로 지도에 표시 (내 위치 표시용 마커)
+        // 모바일 기기 현재 위치 추적
         if (navigator.geolocation) {
           navigator.geolocation.watchPosition(
             function (position) {
@@ -461,7 +478,7 @@
         }
       }
 
-      // 상단의 버튼 이벤트 처리
+      // 이벤트 리스너 등록
       document.getElementById("checkAll").addEventListener("click", () => {
         markerGroups.forEach((group) => {
           group.data.forEach((item) => (item.visited = true));
@@ -478,10 +495,8 @@
         saveVisitedState();
         updateVisitCounter();
       });
-      // "현재 내 위치로" 버튼 이벤트 처리
       document.getElementById("centerLocation").addEventListener("click", centerOnMyLocation);
-      // 고급 버튼 토글 이벤트 처리
-      document.getElementById("advancedToggle").addEventListener("click", toggleAdvancedButtons);
+      document.getElementById("panelToggle").addEventListener("click", toggleAdvancedPanel);
 
       // 정보 다이얼로그 표시 함수
       function showInfoDialog(message) {
