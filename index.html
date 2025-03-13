@@ -41,7 +41,7 @@
         top: 0;
         left: 50%;
         transform: translateX(-50%);
-        background: rgba(0, 0, 0, 0.8);
+        background: rgba(0,0,0,0.8);
         color: white;
         padding: 10px 20px;
         border-radius: 4px;
@@ -94,6 +94,7 @@
       let map;
       let markerGroups = []; // 좌표별 그룹: 그룹당 다수의 장소 정보를 포함
       const STORAGE_KEY = "visitedState";
+      let mobileMarker = null;  // mobile 위치 표시용 마커
 
       // 방문 상태 저장
       function saveVisitedState() {
@@ -195,18 +196,15 @@
       }
 
       // 마커와 팝업을 업데이트 합니다.
-      // 변경 시 팝업 컨텐츠 전체를 교체하는데, 이때 내부 스크롤 위치를 보존합니다.
+      // 이때 기존의 scroll position을 보존하는 처리를 합니다.
       function updateMarkerIcon(group) {
-        // 업데이트된 아이콘 적용
         group.marker.setIcon(getCustomDivIcon(group));
         if (group.infoWindow) {
-          // 현재 스크롤 위치 확보: popup-container에 고유 id로 접근합니다.
           const groupIndex = markerGroups.indexOf(group);
           const containerEl = document.getElementById(`popup-container-${groupIndex}`);
           const scrollTop = containerEl ? containerEl.scrollTop : 0;
           const newContent = createPopupContent(group, groupIndex);
           group.infoWindow.setContent(newContent);
-          // 재렌더링 후 스크롤 위치 복원
           setTimeout(() => {
             const newContainerEl = document.getElementById(`popup-container-${groupIndex}`);
             if (newContainerEl) {
@@ -254,7 +252,7 @@
               }
               group.data.push({ name: entry.name, owner: entry.owner, address: entry.address, visited: false });
             });
-            // 기존에 저장된 방문 상태 불러오기
+            // 기존 방문 상태 불러오기
             const storedState = loadVisitedState();
             if (storedState) {
               markerGroups.forEach((group) => {
@@ -268,8 +266,7 @@
             updateVisitCounter();
 
             // 평균 좌표 계산
-            let sumLat = 0,
-              sumLon = 0;
+            let sumLat = 0, sumLon = 0;
             markerGroups.forEach((group) => {
               sumLat += group.lat;
               sumLon += group.lon;
@@ -277,7 +274,7 @@
             const avgLat = sumLat / markerGroups.length;
             const avgLon = sumLon / markerGroups.length;
 
-            // Naver Map 생성 (줌 레벨을 13으로 설정)
+            // Naver Map 생성 (줌 레벨 13)
             map = new naver.maps.Map("map", {
               center: new naver.maps.LatLng(avgLat, avgLon),
               zoom: 13,
@@ -291,9 +288,9 @@
                 icon: getCustomDivIcon(group),
               });
 
-              // 마커 클릭 이벤트: 팝업(InfoWindow) 생성 또는 업데이트 후 오픈
+              // 마커 클릭 이벤트: 팝업 생성 또는 업데이트
               naver.maps.Event.addListener(group.marker, "click", function (e) {
-                // 닫혀있는 모든 InfoWindow 닫기
+                // 모든 InfoWindow 닫기
                 markerGroups.forEach((g) => {
                   if (g.infoWindow && !g.infoWindow.justOpened) {
                     g.infoWindow.close();
@@ -311,13 +308,12 @@
                     disableAnchor: true,
                   });
                   group.infoWindow.open(map, group.marker);
-                  // 새로 연 InfoWindow에 대해 임시 플래그 추가
                   group.infoWindow.justOpened = true;
                   setTimeout(() => {
                     delete group.infoWindow.justOpened;
                   }, 100);
 
-                  // 마커가 화면 상단에 위치한 경우, 툴팁이 완전히 보이도록 지도 아래로 pan 처리
+                  // 마커가 화면 상단에 위치하면 지도를 아래로 pan
                   setTimeout(() => {
                     if (map.getProjection) {
                       const markerPoint = map.getProjection().fromCoordToOffset(group.marker.getPosition());
@@ -331,7 +327,6 @@
                     }
                   }, 200);
 
-                  // InfoWindow close 시 참조 초기화
                   naver.maps.Event.addListener(group.infoWindow, "closeclick", function () {
                     group.infoWindow = null;
                   });
@@ -339,7 +334,7 @@
               });
             });
 
-            // 문서 클릭 시 툴팁 외부 클릭 처리: InfoWindow 닫기
+            // 문서 클릭 시 InfoWindow 닫기 (툴팁 내부 클릭 제외)
             document.addEventListener("click", function (e) {
               if (e.target.closest(".popup-container")) return;
               markerGroups.forEach((group) => {
@@ -357,6 +352,37 @@
           .catch((err) => {
             console.error("data load error:", err);
           });
+
+        // 모바일 기기의 현재 위치를 실시간으로 지도에 표시
+        if (navigator.geolocation) {
+          navigator.geolocation.watchPosition(
+            function (position) {
+              const lat = position.coords.latitude;
+              const lon = position.coords.longitude;
+              const currentLatLng = new naver.maps.LatLng(lat, lon);
+              if (!mobileMarker) {
+                mobileMarker = new naver.maps.Marker({
+                  position: currentLatLng,
+                  map: map,
+                  icon: {
+                    content: '<div style="color: white; background: blue; border-radius: 50%; width: 20px; height: 20px; text-align: center; line-height: 20px;">Me</div>',
+                    size: new naver.maps.Size(20, 20),
+                    anchor: new naver.maps.Point(10, 10)
+                  }
+                });
+              } else {
+                mobileMarker.setPosition(currentLatLng);
+              }
+            },
+            function (error) {
+              console.error("Geolocation error:", error);
+            },
+            {
+              enableHighAccuracy: true,
+              maximumAge: 0
+            }
+          );
+        }
       }
 
       // 상단의 전체 방문 확인 / 해제 버튼 처리
